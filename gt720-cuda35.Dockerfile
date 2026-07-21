@@ -164,6 +164,11 @@ FROM base AS server
 
 ENV LLAMA_ARG_HOST=0.0.0.0
 
+# CDI provides real libcuda.so at runtime; nvidia/cuda:runtime ships a stub that shadows it
+RUN rm -f /usr/lib/x86_64-linux-gnu/libcuda* /usr/lib/x86_64-linux-gnu/libnvidia* 2>/dev/null || true; \
+    rm -f /usr/lib/x86_64-linux-gnu/nvidia/current/libcuda* 2>/dev/null || true; \
+    ldconfig
+
 COPY --from=build /app/full/llama /app/full/llama-server /app
 
 WORKDIR /app
