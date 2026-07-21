@@ -75,16 +75,14 @@ COPY . .
 
 COPY --from=web /app/build/tools/ui/dist build/tools/ui/dist
 
-RUN if [ -n "${CUDA_DOCKER_ARCH}" ] && [ "${CUDA_DOCKER_ARCH}" != "default" ]; then \
-      export GENCODE="-DCMAKE_CUDA_FLAGS=-gencode arch=compute_${CUDA_DOCKER_ARCH},code=sm_${CUDA_DOCKER_ARCH}"; \
-    else \
-      export GENCODE=""; \
+RUN echo "CUDA_DOCKER_ARCH='${CUDA_DOCKER_ARCH}'" && \
+    if [ -n "${CUDA_DOCKER_ARCH}" ] && [ "${CUDA_DOCKER_ARCH}" != "default" ]; then \
+      sed -i "s/set(CUDA_FLAGS -use_fast_math -extended-lambda)/set(CUDA_FLAGS -use_fast_math -extended-lambda -gencode arch=compute_${CUDA_DOCKER_ARCH},code=sm_${CUDA_DOCKER_ARCH})/" /app/ggml/src/ggml-cuda/CMakeLists.txt && \
+      echo "Patched ggml-cuda for sm${CUDA_DOCKER_ARCH}"; \
     fi && \
-    echo "CUDA_DOCKER_ARCH='${CUDA_DOCKER_ARCH}'" && \
     cmake -B build \
       -DGGML_NATIVE=OFF -DGGML_CUDA=ON -DGGML_BACKEND_DL=OFF -DLLAMA_BUILD_APP=ON -DLLAMA_BUILD_TESTS=OFF \
       -DGGML_AVX=OFF -DGGML_AVX2=OFF -DGGML_FMA=OFF -DGGML_F16C=OFF -DGGML_SSE42=OFF -DGGML_BMI2=OFF \
-      ${GENCODE} \
       -DCMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined . && \
     cmake --build build --config Release -j$(nproc)
 
