@@ -83,6 +83,7 @@ RUN if [ -n "${CUDA_DOCKER_ARCH}" ] && [ "${CUDA_DOCKER_ARCH}" != "default" ]; t
     echo "CUDA_DOCKER_ARCH='${CUDA_DOCKER_ARCH}'" && \
     cmake -B build \
       -DGGML_NATIVE=OFF -DGGML_CUDA=ON -DGGML_BACKEND_DL=OFF -DLLAMA_BUILD_APP=ON -DLLAMA_BUILD_TESTS=OFF \
+      -DGGML_AVX=OFF -DGGML_AVX2=OFF -DGGML_FMA=OFF -DGGML_F16C=OFF -DGGML_SSE42=OFF -DGGML_BMI2=OFF \
       ${CMAKE_ARGS} \
       -DCMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined . && \
     cmake --build build --config Release -j$(nproc)
