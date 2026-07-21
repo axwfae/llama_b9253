@@ -76,15 +76,15 @@ COPY . .
 COPY --from=web /app/build/tools/ui/dist build/tools/ui/dist
 
 RUN if [ -n "${CUDA_DOCKER_ARCH}" ] && [ "${CUDA_DOCKER_ARCH}" != "default" ]; then \
-      export CMAKE_ARGS="-DCMAKE_CUDA_ARCHITECTURES=${CUDA_DOCKER_ARCH}"; \
+      export GENCODE="-DCMAKE_CUDA_FLAGS=-gencode arch=compute_${CUDA_DOCKER_ARCH},code=sm_${CUDA_DOCKER_ARCH}"; \
     else \
-      export CMAKE_ARGS=""; \
+      export GENCODE=""; \
     fi && \
     echo "CUDA_DOCKER_ARCH='${CUDA_DOCKER_ARCH}'" && \
     cmake -B build \
       -DGGML_NATIVE=OFF -DGGML_CUDA=ON -DGGML_BACKEND_DL=OFF -DLLAMA_BUILD_APP=ON -DLLAMA_BUILD_TESTS=OFF \
       -DGGML_AVX=OFF -DGGML_AVX2=OFF -DGGML_FMA=OFF -DGGML_F16C=OFF -DGGML_SSE42=OFF -DGGML_BMI2=OFF \
-      ${CMAKE_ARGS} \
+      ${GENCODE} \
       -DCMAKE_EXE_LINKER_FLAGS=-Wl,--allow-shlib-undefined . && \
     cmake --build build --config Release -j$(nproc)
 
