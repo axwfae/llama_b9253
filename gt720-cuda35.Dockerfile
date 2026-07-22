@@ -1,6 +1,6 @@
 ARG CMAKE_VERSION=3.28.3
 ARG UBUNTU_VERSION=20.04
-ARG CUDA_VERSION=11.4.3
+ARG CUDA_VERSION=11.8.0
 ARG GCC_VERSION=10
 ARG CUDA_DOCKER_ARCH=35
 # For newer GPUs with CUDA 12+ (no sm35 support):
@@ -77,7 +77,7 @@ COPY --from=web /app/build/tools/ui/dist build/tools/ui/dist
 
 RUN echo "CUDA_DOCKER_ARCH='${CUDA_DOCKER_ARCH}'" && \
     if [ -n "${CUDA_DOCKER_ARCH}" ] && [ "${CUDA_DOCKER_ARCH}" != "default" ]; then \
-      sed -i "s/set(CUDA_FLAGS -use_fast_math -extended-lambda)/set(CUDA_FLAGS -use_fast_math -extended-lambda -gencode arch=compute_${CUDA_DOCKER_ARCH},code=sm_${CUDA_DOCKER_ARCH})/" /app/ggml/src/ggml-cuda/CMakeLists.txt && \
+      sed -i "s/set(CUDA_FLAGS -use_fast_math -extended-lambda)/set(CUDA_FLAGS -use_fast_math -extended-lambda -gencode arch=compute_${CUDA_DOCKER_ARCH},code=compute_${CUDA_DOCKER_ARCH})/" /app/ggml/src/ggml-cuda/CMakeLists.txt && \
       echo "Patched ggml-cuda for sm${CUDA_DOCKER_ARCH}"; \
     fi && \
     cmake -B build \
